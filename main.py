@@ -166,8 +166,8 @@ if __name__ == '__main__':
     no = 1
     for i in images:
         i = cc.rotate(i)
-        n=np.vstack((np.zeros((10,i.shape[1])),i,np.zeros((10,i.shape[1]))))
-        i=np.hstack((np.zeros((n.shape[0],10)),n,np.zeros((n.shape[0],10))))
+        n = np.vstack((np.zeros((10, i.shape[1])), i, np.zeros((10, i.shape[1]))))
+        i = np.hstack((np.zeros((n.shape[0], 10)), n, np.zeros((n.shape[0], 10))))
         top_left, top_right, bottom_left, bottom_right = find_intersections(i)
         i = cc.fill_board(i, top_right, 0) # zamienia linia siatki na czarny
         for j in range(2):
