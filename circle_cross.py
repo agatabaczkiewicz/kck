@@ -1,15 +1,15 @@
 import skimage as ski
 from matplotlib import pyplot as plt
-from skimage import data, io, filters, exposure
-from skimage.color import rgb2hsv, hsv2rgb, rgb2gray
+from skimage import data, io, filters, exposure, img_as_ubyte
 import skimage.morphology as mp
-from skimage.transform import resize
+from skimage.transform import resize, hough_ellipse
 from skimage.segmentation import flood_fill
 import numpy as np
 import photo_spliting as ps
 import math
-import warnings
+
 import cv2
+
 
 
 def load_file(path):
@@ -19,14 +19,12 @@ def load_file(path):
     return photo
 
 
-def black_white(img):
-    warnings.simplefilter("ignore")
-    img = rgb2gray(img)
-    img **= 3
-    img = (img <= 0.04) * 1
-    for i in range(1):
-        img = mp.dilation(img)
-    img = (img == 1) * 255
+def tresholding(img):
+    kernel = np.ones((5, 5), np.uint8)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    (thresh, img) = cv2.threshold(blurred, 130, 255, cv2.THRESH_BINARY_INV)
+    img = cv2.dilate(img, kernel, iterations=1)
     return img
 
 
@@ -61,6 +59,7 @@ def cut_min(img):
 
 def fill_board(img, top_right,color=125): #linie planszy będą czarne
     img = ski.segmentation.flood_fill(img, (top_right[1], top_right[0]), color)
+    # img = cv2.floodFill(img, None, (top_right[1], top_right[0]), color)
     return img
 
 
@@ -71,7 +70,8 @@ def print_result(result):
 
 def show_img(img):
     fig, ax = plt.subplots()
-    plt.grid(True)
+    #plt.grid(True)
+    plt.axis('off')
     ax.imshow(img, cmap=plt.cm.gray)
     return ax
 
