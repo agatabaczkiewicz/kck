@@ -16,6 +16,7 @@ def load_file(path):
     photo = io.imread(path)
     if photo.shape[0] * photo.shape[1] > 1000 * 2000:
         photo = cv2.resize(photo, (int(photo.shape[1]/4), int(photo.shape[0]/4)))
+    #show_img(photo)
     return photo
 
 
@@ -27,35 +28,25 @@ def black_white(img):
     for i in range(1):
         img = mp.dilation(img)
     img = (img == 1) * 255
+    show_img(img)
     return img
 
 
-def cut(img, tag, color):
-    if tag == 'allp':
-        while (img[0, :] == color).all():
-            img = np.delete(img, 0, 0)
-        while (img[:, 0] == color).all():
-            img = np.delete(img, 0, 1)
+def cut(img, color):
+        while (img[0, :] == color).all(): # dla kazdej kolmny pierwszy wiersz
+            img = np.delete(img, 0, 0) # usuwa pierwszy wiersz
         while (img[-1, :] == color).all():
-            img = np.delete(img, -1, 0)
+            img = np.delete(img, -1, 0) # usuwa ostatni wiersz
+        while (img[:, 0] == color).all():
+            img = np.delete(img, 0, 1) # usuwa pierwsza kolumne
         while (img[:, -1] == color).all():
-            img = np.delete(img, -1, 1)
-    elif tag == 'anyp':
-        while (img[0, :] == color).any():
-            img = np.delete(img, 0, 0)
-        while (img[:, 0] == color).any():
-            img = np.delete(img, 0, 1)
-        while (img[-1, :] == color).any():
-            img = np.delete(img, -1, 0)
-        while (img[:, -1] == color).any():
-            img = np.delete(img, -1, 1)
-    return img
+            img = np.delete(img, -1, 1) # usuwa ostatnia kolumne
+        return img
 
 
 def cut_min(img):
-    img = cut(img, 'allp', 255)
-    img = cut(img, 'anyp', 255)
-    img = cut(img, 'allp', 0)
+    img = cut(img, 0)
+    show_img(img)
     return img
 
 
@@ -77,26 +68,16 @@ def show_img(img):
 
 
 def rotate(rot):
-    corners = ski.transform.probabilistic_hough_line(rot,line_length=int(2 / 3 * min(rot.shape[0], rot.shape[1])),
+    corners = ski.transform.probabilistic_hough_line(rot,line_length=int(2 / 3 * (rot.shape[0])),
                                                          line_gap=1)
     line = corners[0]
-    c = np.array([line[0][0], line[1][1]])
-    len1 = np.linalg.norm(c - np.array(line[0]))
-    len2 = np.linalg.norm(c - np.array(line[1]))
+    for a in corners:
+        if line[0][1] > a[0][1] or line[1][1] > a[1][1]:
+            line = a
 
-    if line[0][0] >= line[1][0] and line[0][1] >= line[1][0]:
-        if len2 != 0:
-            tangens = len1 / len2
-        else:
-            tangens = 0
-    else:
-        if len1 != 0:
-            tangens = len2 / len1
-        else:
-            tangens = 0
+    angle = math.degrees(math.atan2(line[0][1]- line[1][1], line[0][0]- line[1][0]))
 
-    angle = np.degrees(math.atan(tangens))
-    if angle > 10:
+    if angle > 5:
         rot = ps.make_big_square(rot)
         rot = ski.transform.rotate(rot, angle)
         rot = cut_min(rot)

@@ -159,11 +159,14 @@ def find_intersections(i):
 
 
 if __name__ == '__main__':
-    img = cc.load_file('photo25.jpg')
+    img = cc.load_file('images/photo13.jpg')
     img = cc.black_white(img)
+    #img = mp.white_tophat(img, selems)
     img = cc.cut_min(img)
     images = ps.photo_division(img)
     no = 1
+    print(len(images))
+
     for i in images:
         i = cc.rotate(i)
         n = np.vstack((np.zeros((10, i.shape[1])), i, np.zeros((10, i.shape[1]))))
@@ -194,10 +197,8 @@ if __name__ == '__main__':
             print("Wygrały X")
         else:
             print("Nikt nie wygrał")
-        ax = cc.show_img(i)
+        #ax = cc.show_img(i)
         plt.show()
-
-
 
 
 
