@@ -20,15 +20,12 @@ def load_file(path):
     return photo
 
 
-def black_white(img):
-    warnings.simplefilter("ignore")
-    img = rgb2gray(img)
-    img **= 3
-    img = (img <= 0.04) * 1
-    for i in range(1):
-        img = mp.dilation(img)
-    img = (img == 1) * 255
-    show_img(img)
+def tresholding(img):
+    kernel = np.ones((5, 5), np.uint8)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    (thresh, img) = cv2.threshold(blurred, 130, 255, cv2.THRESH_BINARY_INV)
+    img = cv2.dilate(img, kernel, iterations=1)
     return img
 
 
@@ -67,8 +64,8 @@ def show_img(img):
     return ax
 
 
-def rotate(rot):
-    corners = ski.transform.probabilistic_hough_line(rot,line_length=int(2 / 3 * (rot.shape[0])),
+def rotate(img):
+    corners = ski.transform.probabilistic_hough_line(img,line_length=int(2 / 3 * (img.shape[0])),
                                                          line_gap=1)
     line = corners[0]
     for a in corners:
@@ -78,12 +75,11 @@ def rotate(rot):
     angle = math.degrees(math.atan2(line[0][1]- line[1][1], line[0][0]- line[1][0]))
 
     if angle > 5:
-        rot = ps.make_big_square(rot)
-        rot = ski.transform.rotate(rot, angle)
-        rot = cut_min(rot)
-        rot = (rot >= 1) * 255
-        rot = mp.dilation(mp.erosion(rot))
+        img = ps.make_big_square(img)
+        img = ski.transform.rotate(img, angle)
+        img = cut_min(img)
+        img = (rot >= 1) * 255
+        img = mp.dilation(mp.erosion(img))
 
-    return rot
-
+    return img
 
