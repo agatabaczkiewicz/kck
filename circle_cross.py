@@ -78,7 +78,7 @@ def rotate(img):
         img = ps.make_big_square(img)
         img = ski.transform.rotate(img, angle)
         img = cut_min(img)
-        img = (rot >= 1) * 255
+        img = (img >= 1) * 255
         img = mp.dilation(mp.erosion(img))
 
     return img
