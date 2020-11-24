@@ -208,7 +208,9 @@ def changeXYaxis(up_l, up_r, down_l, down_r):
 
 
 if __name__ == '__main__':
-    img = cc.load_file('photo28.jpg')
+
+    img = cc.load_file('photo25.jpg')
+    ax = cc.show_img(img)
     img = cc.tresholding(img)
     img = cc.cut_min(img)
     images = ps.photo_division(img)
