@@ -8,8 +8,6 @@ from skimage.transform import resize
 from skimage.segmentation import flood_fill
 import numpy as np
 import photo_spliting as ps
-import math
-import warnings
 import circle_cross as cc
 from numpy import *
 import cv2
@@ -38,7 +36,7 @@ def cross_point(a1, a2, b1, b2):
 
 def result(result, mark):
     for i in range(3):
-        if result[0][1] == result[1][i] == result[2][i] == mark:  # sprawdza w pionie
+        if result[0][i] == result[1][i] == result[2][i] == mark:  # sprawdza w pionie
             return True
         if result[i][0] == result[i][1] == result[i][2] == mark:  # w poziomie
             return True
@@ -209,9 +207,11 @@ def changeXYaxis(up_l, up_r, down_l, down_r):
 
 if __name__ == '__main__':
 
-    img = cc.load_file('photo25.jpg')
-    ax = cc.show_img(img)
-    img = cc.tresholding(img)
+    img = cc.load_file('p1.jpg')
+    # ax = cc.show_img(img)
+    #dla zdjęc ktore generalnie są jasne np.photo25 lepiej sprawdza się gam=2
+    # nie wiem jak to uwarunkować
+    img = cc.tresholding2(img, 2.75)
     img = cc.cut_min(img)
     images = ps.photo_division(img)
     no = 1
@@ -219,10 +219,13 @@ if __name__ == '__main__':
     for i in images:
 
         i = cc.rotate(i)
-        # n = np.vstack((np.zeros((10, i.shape[1])), i, np.zeros((10, i.shape[1])))) # dodają czarne pasy na górzze i po bokach
-        # i = np.hstack((np.zeros((n.shape[0], 10)), n, np.zeros((n.shape[0], 10))))
         up_l, up_r, down_l, down_r = find_intersections(i)
+        ax = cc.show_img(img)
+        #zapobiega przypadkowy gdy cześć lini jest na tyle cienka że jej nie widać
         i = cc.fill_board(i, up_r, 0)  # zamienia linia siatki na czarny
+        i = cc.fill_board(i, up_l, 0)
+        i = cc.fill_board(i, down_r, 0)
+        i = cc.fill_board(i, down_l, 0)
         print(type(i))
         i = put_contour2(i)
         up_l, up_r, down_l, down_r = changeXYaxis(up_l, up_r, down_l, down_r)
