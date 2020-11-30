@@ -1,14 +1,10 @@
 #!/usr/bin/python
 import skimage as ski
 from matplotlib import pyplot as plt
-from skimage import data, io, filters, exposure
-from skimage.color import rgb2hsv, hsv2rgb, rgb2gray
 import skimage.morphology as mp
 from skimage.transform import resize
-from skimage.segmentation import flood_fill
-import numpy as np
-import photo_spliting as ps
 import circle_cross as cc
+import numpy as np
 from numpy import *
 import cv2
 import imutils
@@ -171,18 +167,6 @@ def find_intersections(i):
     return up_l, up_r, down_l, down_r
 
 
-def put_contour(img):
-    for k in range(2):
-        img = mp.dilation(img)
-    contours = ski.measure.find_contours(img, 0.5)
-    color = 20
-    for contour in contours:
-        for j in contour:
-            img[int(round(j[0])), int(round(j[1]))] = color
-        color += 10
-    return img
-
-
 def put_contour2(image):
     # for k in range(2):
     #     image = mp.dilation(image)
@@ -207,33 +191,34 @@ def changeXYaxis(up_l, up_r, down_l, down_r):
 
 if __name__ == '__main__':
 
-    img = cc.load_file('p1.jpg')
+    img = cc.load_file('z18.jpg')
     # ax = cc.show_img(img)
     #dla zdjęc ktore generalnie są jasne np.photo25 lepiej sprawdza się gam=2
     # nie wiem jak to uwarunkować
     img = cc.tresholding2(img, 2.75)
     img = cc.cut_min(img)
-    images = ps.photo_division(img)
+    images = cc.photo_division(img)
     no = 1
 
     for i in images:
 
-        i = cc.rotate(i)
-        up_l, up_r, down_l, down_r = find_intersections(i)
-        ax = cc.show_img(img)
-        #zapobiega przypadkowy gdy cześć lini jest na tyle cienka że jej nie widać
-        i = cc.fill_board(i, up_r, 0)  # zamienia linia siatki na czarny
-        i = cc.fill_board(i, up_l, 0)
-        i = cc.fill_board(i, down_r, 0)
-        i = cc.fill_board(i, down_l, 0)
-        print(type(i))
-        i = put_contour2(i)
-        up_l, up_r, down_l, down_r = changeXYaxis(up_l, up_r, down_l, down_r)
-        print("\nplansza numer:", no)
-        no += 1
-        res = search_forXO(i, up_l, up_r, down_l, down_r)
-        cc.print_result(res)
-        print(who_win(res))
-        ax = cc.show_img(i)
-        plt.show()
+        i, check = cc.rotate(i)
+        if check == True:
+            up_l, up_r, down_l, down_r = find_intersections(i)
+            ax = cc.show_img(img)
+            #zapobiega przypadkowy gdy cześć lini jest na tyle cienka że jej nie widać
+            i = cc.fill_board(i, up_r, 0)  # zamienia linia siatki na czarny
+            i = cc.fill_board(i, up_l, 0)
+            i = cc.fill_board(i, down_r, 0)
+            i = cc.fill_board(i, down_l, 0)
+            print(type(i))
+            i = put_contour2(i)
+            up_l, up_r, down_l, down_r = changeXYaxis(up_l, up_r, down_l, down_r)
+            print("\nplansza numer:", no)
+            no += 1
+            res = search_forXO(i, up_l, up_r, down_l, down_r)
+            cc.print_result(res)
+            print(who_win(res))
+            ax = cc.show_img(i)
+            plt.show()
 
